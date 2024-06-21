@@ -1,2 +1,2 @@
 # NLP
-## TU Darmstadt Student Research Assistant
+## Student Research Assistant
