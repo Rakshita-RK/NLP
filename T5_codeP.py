@@ -15,7 +15,7 @@ model = AutoModel.from_pretrained(checkpoint, trust_remote_code=True).to(device)
 
 # Function to process a single example and get embeddings
 def process_example(example):
-    code = example["code"]
+    code = example["func_code_string"]
     inputs = tokenizer.encode(code, return_tensors="pt", max_length=512, truncation=True).to(device)
     with torch.no_grad():
         outputs = model(inputs)
@@ -35,10 +35,10 @@ for example in dataset:
 embedding_matrix = np.stack(embeddings, axis=0)  # Shape: (num_examples, embedding_size)
 
 # Step 5: Perform SVD
-U, S, VT = svd(embedding_matrix, full_matrices=False)
-
-# Print shapes of SVD components
-print(f'U shape: {U.shape}')
-print(f'S shape: {S.shape}')
-print(f'VT shape: {VT.shape}')
-
+try:
+    U, S, VT = svd(embedding_matrix, full_matrices=False)
+    print(f'U shape: {U.shape}')
+    print(f'S shape: {S.shape}')
+    print(f'VT shape: {VT.shape}')
+except ValueError as e:
+    print(f"Error in SVD computation: {e}")
