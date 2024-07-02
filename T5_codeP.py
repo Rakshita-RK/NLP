@@ -19,11 +19,8 @@ def process_example(example):
     inputs = tokenizer.encode(code, return_tensors="pt", max_length=512, truncation=True).to(device)
     with torch.no_grad():
         outputs = model(inputs)
-    # Extract the last hidden state (embeddings)
-    embeddings = outputs.last_hidden_state  # Shape: (1, sequence_length, embedding_size)
-    # Mean pooling to get a single embedding per function
-    mean_embedding = embeddings.mean(dim=1)  # Shape: (1, embedding_size)
-    return mean_embedding.cpu().numpy().squeeze()
+    embeddings = outputs  # The output is already the required embedding
+    return embeddings.cpu().numpy().squeeze()
 
 # Step 3: Iterate over the dataset and generate embeddings
 embeddings = []
@@ -40,5 +37,17 @@ try:
     print(f'U shape: {U.shape}')
     print(f'S shape: {S.shape}')
     print(f'VT shape: {VT.shape}')
+    
+    # Step 6: Check the condition on the diagonal values
+    total_sum = np.sum(S)
+    cumulative_sum = 0
+    iterations = 0
+    for singular_value in S:
+        cumulative_sum += singular_value
+        iterations += 1
+        if cumulative_sum / total_sum >= 0.99:
+            break
+    
+    print(f'Number of iterations required: {iterations}')
 except ValueError as e:
     print(f"Error in SVD computation: {e}")
